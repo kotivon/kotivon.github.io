@@ -79,7 +79,7 @@
                 overlay.style.display = 'none';
                 
                 // iframe'i yeniden yükle (autoplay ile)
-                iframe.src = 'https://www.facebook.com/plugins/video.php?height=315&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F691894150432690&show_text=false&width=560&autoplay=true&mute=false';
+                iframe.src = 'https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href=https%3A%2F%2Fwww.facebook.com%2Fredbull%2Fvideos%2F10155801793140352%2F&locale=en_US&sdk=joey';
                 
                 started = true;
             }
@@ -90,7 +90,7 @@
             setTimeout(function() {
                 // Kullanıcı bir şey yapmadan başlatmaya çalış
                 const iframe = document.getElementById('videoFrame');
-                iframe.src = 'https://www.facebook.com/plugins/video.php?height=315&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F691894150432690&show_text=false&width=560&autoplay=true&mute=true';
+                iframe.src = 'https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href=https%3A%2F%2Fwww.facebook.com%2Fredbull%2Fvideos%2F10155801793140352%2F&locale=en_US&sdk=joey';
                 
                 // 2 saniye sonra overlay'i kaldır
                 setTimeout(function() {
