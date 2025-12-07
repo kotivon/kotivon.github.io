@@ -1,6 +1,75 @@
-<iframe src="https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/reel/691894150432690&autoplay=true&mute=true" 
-        width="560" 
-        height="315" 
-        frameborder="0" 
-        allowfullscreen>
-</iframe>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video</title>
+    <meta name="referrer" content="no-referrer">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #000;
+            overflow: hidden;
+        }
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        iframe {
+            max-width: 100%;
+            max-height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <iframe id="videoFrame"
+                width="560" 
+                height="315" 
+                frameborder="0" 
+                allowfullscreen
+                allow="autoplay; encrypted-media">
+        </iframe>
+    </div>
+
+    <script>
+        // Referrer'ı gizle ve videoyu yükle
+        const iframe = document.getElementById('videoFrame');
+        const videoUrl = 'https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/reel/691894150432690&autoplay=1&mute=1&show_text=0';
+        
+        // Rastgele referrer oluştur
+        const referrers = [
+            'https://www.google.com/',
+            'https://www.youtube.com/',
+            'https://twitter.com/',
+            'https://www.reddit.com/',
+            'https://www.instagram.com/'
+        ];
+        
+        const randomReferrer = referrers[Math.floor(Math.random() * referrers.length)];
+        
+        // Meta tag güncelle
+        document.querySelector('meta[name="referrer"]').setAttribute('content', 'no-referrer');
+        
+        // iframe'i yükle
+        iframe.src = videoUrl;
+        
+        // Sayfa yüklendiğinde videoyu başlat
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            }, 1000);
+        });
+        
+        // Console'u temizle
+        console.clear();
+    </script>
+</body>
+</html>
