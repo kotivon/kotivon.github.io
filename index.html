@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Generator</title>
+</head>
+<body style="margin:0;padding:0">
+    <!-- Facebook video embed -->
+    <iframe 
+        src="https://www.facebook.com/plugins/video.php?href=VIDEO_URL&width=500"
+        width="500" 
+        height="280"
+        style="border:none;overflow:hidden"
+        scrolling="no" 
+        frameborder="0" 
+        allowfullscreen="true">
+    </iframe>
+    
+    <script>
+        // Auto-play simulation
+        setTimeout(() => {
+            const iframe = document.querySelector('iframe');
+            iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+        }, 2000);
+    </script>
+</body>
+</html>
