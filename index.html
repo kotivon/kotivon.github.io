@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video</title>
-    <meta name="referrer" content="no-referrer">
+    <title>Video Player</title>
+    <meta name="referrer" content="no-referrer-when-downgrade">
     <style>
         * {
             margin: 0;
@@ -12,8 +12,9 @@
             box-sizing: border-box;
         }
         body {
-            background: #000;
+            background: #1c1e21;
             overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         .container {
             width: 100vw;
@@ -23,90 +24,220 @@
             justify-content: center;
             position: relative;
         }
-        iframe {
+        #videoFrame {
             max-width: 100%;
             max-height: 100%;
             border: none;
+            background: #000;
         }
-        #clickOverlay {
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: monospace;
+            z-index: 1000;
+        }
+        .overlay {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            cursor: pointer;
-            z-index: 10;
-            background: rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-family: Arial, sans-serif;
-        }
-        #clickOverlay:hover {
-            background: rgba(0,0,0,0.5);
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 5;
         }
     </style>
 </head>
 <body>
+    <div class="status" id="status">Initializing...</div>
     <div class="container">
-        <div id="clickOverlay" onclick="startVideo()">
-            ▶ Videoyu Başlat
-        </div>
+        <div class="overlay" id="overlay"></div>
         <iframe id="videoFrame"
                 width="560" 
                 height="315" 
                 frameborder="0" 
-                allowfullscreen
-                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                src="hhttps://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href=https%3A%2F%2Fwww.facebook.com%2Fredbull%2Fvideos%2F10155801793140352%2F&locale=en_US&sdk=joey">
+                scrolling="no"
+                allowfullscreen="true"
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share; accelerometer; gyroscope"
+                sandbox="allow-scripts allow-same-origin allow-presentation">
         </iframe>
     </div>
 
     <script>
-        // Referrer gizleme
-        document.querySelector('meta[name="referrer"]').setAttribute('content', 'no-referrer');
-        
-        let started = false;
-        
-        function startVideo() {
-            if (!started) {
-                const overlay = document.getElementById('clickOverlay');
-                const iframe = document.getElementById('videoFrame');
+        // Reverse Engineering Approach - Facebook Embed Protocol
+        class FacebookVideoAutomation {
+            constructor() {
+                this.videoId = '691894150432690';
+                this.baseUrl = 'https://www.facebook.com/plugins/video.php';
+                this.iframe = document.getElementById('videoFrame');
+                this.status = document.getElementById('status');
+                this.overlay = document.getElementById('overlay');
+                this.watchDuration = this.getRandomDuration(3000, 5000); // 3-5 saniye
+                this.startTime = null;
+            }
+
+            getRandomDuration(min, max) {
+                return Math.floor(Math.random() * (max - min + 1)) + min;
+            }
+
+            updateStatus(msg) {
+                this.status.textContent = msg;
+                console.log(`[FB-AUTO] ${msg}`);
+            }
+
+            buildUrl(autoplay = false, muted = true) {
+                const params = new URLSearchParams({
+                    href: `https://www.facebook.com/reel/${this.videoId}`,
+                    show_text: '0',
+                    width: '560',
+                    height: '315',
+                    autoplay: autoplay ? '1' : '0',
+                    muted: muted ? '1' : '0',
+                    t: '0'
+                });
+                return `${this.baseUrl}?${params.toString()}`;
+            }
+
+            simulateHumanInteraction() {
+                // Fare hareketlerini simüle et
+                const moveEvent = new MouseEvent('mousemove', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
                 
-                // Overlay'i kaldır
-                overlay.style.display = 'none';
+                // Tıklama simülasyonu
+                const clickEvent = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
                 
-                // iframe'i yeniden yükle (autoplay ile)
-                iframe.src = 'https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href=https%3A%2F%2Fwww.facebook.com%2Fredbull%2Fvideos%2F10155801793140352%2F&locale=en_US&sdk=joey';
+                document.body.dispatchEvent(moveEvent);
+                this.overlay.dispatchEvent(clickEvent);
                 
-                started = true;
+                // Klavye etkileşimi
+                const keyEvent = new KeyboardEvent('keydown', {
+                    bubbles: true,
+                    cancelable: true,
+                    key: 'ArrowDown'
+                });
+                document.dispatchEvent(keyEvent);
+            }
+
+            async injectAutoplay() {
+                this.updateStatus('Loading video...');
+                
+                // İlk yükleme - sessiz ve otomatik oynat
+                this.iframe.src = this.buildUrl(true, true);
+                
+                // Kullanıcı etkileşimi simülasyonu
+                await this.sleep(500);
+                this.simulateHumanInteraction();
+                
+                await this.sleep(1000);
+                this.updateStatus('Attempting autoplay...');
+                
+                // İkinci deneme - iframe yeniden yükleme
+                this.iframe.src = this.buildUrl(true, true);
+                
+                await this.sleep(1500);
+                
+                // Facebook postMessage protokolü
+                this.sendPlayCommand();
+                
+                this.startTime = Date.now();
+                this.updateStatus(`Playing for ${(this.watchDuration/1000).toFixed(1)}s...`);
+                
+                // İzleme süresi
+                this.monitorPlayback();
+            }
+
+            sendPlayCommand() {
+                // Facebook video player'a postMessage gönder
+                const commands = [
+                    {event: 'command', func: 'playVideo', args: ''},
+                    {event: 'command', func: 'mute', args: ''},
+                    {event: 'listening', value: true}
+                ];
+                
+                commands.forEach(cmd => {
+                    try {
+                        this.iframe.contentWindow.postMessage(JSON.stringify(cmd), '*');
+                    } catch(e) {
+                        // Cross-origin restriction
+                    }
+                });
+            }
+
+            monitorPlayback() {
+                const checkInterval = setInterval(() => {
+                    const elapsed = Date.now() - this.startTime;
+                    const remaining = this.watchDuration - elapsed;
+                    
+                    if (remaining > 0) {
+                        this.updateStatus(`Watching: ${(remaining/1000).toFixed(1)}s left`);
+                    } else {
+                        clearInterval(checkInterval);
+                        this.updateStatus('✓ View completed!');
+                        this.completeView();
+                    }
+                }, 100);
+            }
+
+            completeView() {
+                // View tamamlandı - analytics trigger
+                setTimeout(() => {
+                    this.updateStatus('✓ Session complete');
+                    // İsteğe bağlı: sayfayı yenile veya başka işlem
+                }, 1000);
+            }
+
+            sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            async start() {
+                this.updateStatus('Initializing automation...');
+                await this.sleep(1000);
+                
+                // Kullanıcı etkileşimi bypass
+                document.addEventListener('click', () => {
+                    this.sendPlayCommand();
+                }, { once: true });
+                
+                // Otomatik tıklama simülasyonu
+                setTimeout(() => {
+                    const clickEvent = new MouseEvent('click', { bubbles: true });
+                    document.body.dispatchEvent(clickEvent);
+                }, 100);
+                
+                await this.injectAutoplay();
             }
         }
+
+        // Initialize automation
+        const automation = new FacebookVideoAutomation();
         
-        // Otomatik başlatma denemesi (tarayıcı izin verirse)
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                // Kullanıcı bir şey yapmadan başlatmaya çalış
-                const iframe = document.getElementById('videoFrame');
-                iframe.src = 'https://www.facebook.com/v2.3/plugins/video.php?allowfullscreen=true&autoplay=true&container_width=800&href=https%3A%2F%2Fwww.facebook.com%2Fredbull%2Fvideos%2F10155801793140352%2F&locale=en_US&sdk=joey';
-                
-                // 2 saniye sonra overlay'i kaldır
-                setTimeout(function() {
-                    document.getElementById('clickOverlay').style.display = 'none';
-                }, 2000);
-            }, 500);
+        // Sayfa yüklendiğinde başlat
+        window.addEventListener('load', async () => {
+            await automation.start();
         });
-        
-        // Herhangi bir tıklamada başlat
-        document.addEventListener('click', function() {
-            if (!started) {
-                startVideo();
-            }
+
+        // Ekstra trigger - herhangi bir kullanıcı etkileşimi
+        ['click', 'touchstart', 'keydown'].forEach(eventType => {
+            document.addEventListener(eventType, () => {
+                automation.sendPlayCommand();
+            }, { once: true, passive: true });
         });
-        
-        console.clear();
+
+        // Console temizleme
+        setTimeout(() => console.clear(), 2000);
     </script>
 </body>
 </html>
