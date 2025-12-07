@@ -21,54 +21,91 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
         iframe {
             max-width: 100%;
             max-height: 100%;
+            border: none;
+        }
+        #clickOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 10;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-family: Arial, sans-serif;
+        }
+        #clickOverlay:hover {
+            background: rgba(0,0,0,0.5);
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div id="clickOverlay" onclick="startVideo()">
+            ▶ Videoyu Başlat
+        </div>
         <iframe id="videoFrame"
                 width="560" 
                 height="315" 
                 frameborder="0" 
                 allowfullscreen
-                allow="autoplay; encrypted-media">
+                allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                src="https://www.facebook.com/plugins/video.php?height=315&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F691894150432690&show_text=false&width=560&t=0">
         </iframe>
     </div>
 
     <script>
-        // Referrer'ı gizle ve videoyu yükle
-        const iframe = document.getElementById('videoFrame');
-        const videoUrl = 'https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/reel/691894150432690&autoplay=1&mute=1&show_text=0';
-        
-        // Rastgele referrer oluştur
-        const referrers = [
-            'https://www.google.com/',
-            'https://www.youtube.com/',
-            'https://twitter.com/',
-            'https://www.reddit.com/',
-            'https://www.instagram.com/'
-        ];
-        
-        const randomReferrer = referrers[Math.floor(Math.random() * referrers.length)];
-        
-        // Meta tag güncelle
+        // Referrer gizleme
         document.querySelector('meta[name="referrer"]').setAttribute('content', 'no-referrer');
         
-        // iframe'i yükle
-        iframe.src = videoUrl;
+        let started = false;
         
-        // Sayfa yüklendiğinde videoyu başlat
+        function startVideo() {
+            if (!started) {
+                const overlay = document.getElementById('clickOverlay');
+                const iframe = document.getElementById('videoFrame');
+                
+                // Overlay'i kaldır
+                overlay.style.display = 'none';
+                
+                // iframe'i yeniden yükle (autoplay ile)
+                iframe.src = 'https://www.facebook.com/plugins/video.php?height=315&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F691894150432690&show_text=false&width=560&autoplay=true&mute=false';
+                
+                started = true;
+            }
+        }
+        
+        // Otomatik başlatma denemesi (tarayıcı izin verirse)
         window.addEventListener('load', function() {
             setTimeout(function() {
-                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-            }, 1000);
+                // Kullanıcı bir şey yapmadan başlatmaya çalış
+                const iframe = document.getElementById('videoFrame');
+                iframe.src = 'https://www.facebook.com/plugins/video.php?height=315&href=https%3A%2F%2Fwww.facebook.com%2Freel%2F691894150432690&show_text=false&width=560&autoplay=true&mute=true';
+                
+                // 2 saniye sonra overlay'i kaldır
+                setTimeout(function() {
+                    document.getElementById('clickOverlay').style.display = 'none';
+                }, 2000);
+            }, 500);
         });
         
-        // Console'u temizle
+        // Herhangi bir tıklamada başlat
+        document.addEventListener('click', function() {
+            if (!started) {
+                startVideo();
+            }
+        });
+        
         console.clear();
     </script>
 </body>
